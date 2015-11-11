@@ -4,6 +4,7 @@
 This plugin for [Fat-Free Framework](http://github.com/bcosca/fatfree) helps you control access to your routes.
 
 * [Requirements](#requirements)
+* [Installation](#installation)
 * [Basic usage](#basic-usage)
 * [Advanced usage](#advanced-usage)
     * [Authorization failure](#authorization-failure)
@@ -16,9 +17,10 @@ This plugin for [Fat-Free Framework](http://github.com/bcosca/fatfree) helps you
 * [Wildcards](#wildcards)
 * [Ini configuration](#ini-configuration)
 * [Practical configuration examples](#practical-configuration-examples)
-    * [Secure an admin area](#secure–an-admin-area)
+    * [Secure an admin area](#secure-an-admin-area)
     * [Secure MVC-like routes](#secure-mvc-like-routes)
     * [Secure RMR-like routes](#secure-rmr-like-routes)
+    * [Secure a members-only site](#secure-a-members-only-site)
 * [API](#api)
 * [Potential improvements](#potential-improvements)
 
@@ -32,7 +34,7 @@ To install this plugin, just copy the `lib/access.php` file into your `lib/` or 
 
 ## Basic usage
 
-Instantiate the plugin and define a default access policy (*allow* or *deny*) to your routes:
+Instantiate the plugin and define a default access policy (*allow* or *deny*) for your routes:
 
 ```php
 $access=Access::instance();
@@ -43,14 +45,16 @@ Then define a set of rules to protect a specific route:
 
 ```php
 $access->deny('/secured.htm'); // globally deny access to /secured.htm
-$access->allow('/secured.htm','admin'); // grant "admin" access to /secured.htm
+$access->allow('/secured.htm','admin'); // allow "admin" to access /secured.htm
 ```
 
 or a group of routes:
 
 ```php
-$access->deny('/protected*'); // globally deny access to any URI starting by /protected
-$access->allow('/protected*','admin'); // grant "admin" access to any URI starting by /protected
+// globally deny access to any URI prefixed by /protected
+$access->deny('/protected*');
+// allow "admin" to access any URI prefixed by /protected
+$access->allow('/protected*','admin');
 ```
 
 And call the `authorize()` method where it fits your app best (before or after `$f3->run()`):
@@ -84,7 +88,7 @@ $access->allow('/foo',array('tic','tac','toe')); // array
 ### Authorization failure
 
 A denied access will result in a 403 error if the subject is identified or a 401 if it is not.
-So if we keep our first example:
+In our first example:
 * `$somebody='client'` would get a 403 error (Forbidden)
 * `$somebody=''` would get a 401 error (Unauthorized => user should authenticate first)
 
@@ -92,7 +96,7 @@ You can provide a callback to the `authorize()` method, which will be triggered 
 ```php
 $access->authorize($somebody,function($route,$subject){
   echo "$subject is denied access to $route";// $route is a method followed by a path
-})
+});
 ```
 The default behaviour (403/401) is then skipped, unless the fallback returns FALSE.
 
@@ -131,7 +135,7 @@ This method performs a simple check and doesn't take any action (no error thrown
 
 ### Path precedence
 
-Rules are sorted from the most specific to the least specific path before being applied.
+Rules are sorted from the most specific to the least specific path before being processed.
 So the following rules:
 
 ```php
@@ -166,7 +170,7 @@ $access->allow('/part1','zig,zag');// rule #3
 ```
 
 are processed in the following order:
-* 2,3,1 for the suject "zag"
+* 2,3,1 for the subject "zag"
 * 3,1 for the subject "zig"
 
 ### Routes uniqueness
@@ -190,11 +194,11 @@ Wildcards can be used at various places:
 
 * instead of a route verb, meaning "any verb": `* /path`
   * equivalent to `/path`
-  * and `GET|HEAD|POST|PUT|PATCH|DELETE|CONNECT /path`
+  * equivalent to `GET|HEAD|POST|PUT|PATCH|DELETE|CONNECT /path`
 * in a route path, meaning "any character": `GET /foo/*/baz`
 * instead of a subject, meaning "any subject": `$f3->allow('/','*')`
   * equivalent to `$f3->allow('/','')`
-  * and `$f3->allow('/')`
+  * equivalent to `$f3->allow('/')`
 
 ## Ini configuration
 
@@ -208,8 +212,8 @@ policy = deny ;deny all routes by default
 
 [ACCESS.rules]
 ALLOW /foo = *
-ALLOW /bar* = Albert,Jim
-DENY /bar/baz = Jim
+ALLOW /bar* = Albert,Jean-Louis
+DENY /bar/baz = Jean-Louis
 ```
 
 It works with HTTP verbs as well:
@@ -248,6 +252,16 @@ allow /*/create = superuser
 deny * /* = *
 deny GET /* = *
 allow POST|PUT|PATCH|DELETE = superuser
+```
+
+### Secure a members-only site
+
+```ini
+ACCESS.policy = deny
+
+[ACCESS.rules]
+allow / = * ; login form
+allow /* = member
 ```
 
 ## API
@@ -314,7 +328,7 @@ $access->authorize('admin',function($route,$subject){
 });
 $access->authorize('admin','My\App->forbidden');
 ```
-See [here](#authorization-failure) for details about what happends when authorization fails.
+See [here](#authorization-failure) for details about what happens when authorization fails.
 
 ## Potential improvements
 
