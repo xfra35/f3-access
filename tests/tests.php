@@ -77,6 +77,25 @@ class Tests {
             !$access->granted('/blog/entry/edit','admin'),
             'Wildcard precedence order'
         );
+        //Tokens
+        $access=new \Access();
+        $access->deny('/@lang/foo');
+        $test->expect(
+            !$access->granted('/en/foo') && $access->granted('/en/bar/foo'),
+            'Route tokens support'
+        );
+        $access->deny('/foo/@/baz');
+        $test->expect(
+            !$access->granted('/foo/bar/baz') && $access->granted('/foo/bar/baz/bis'),
+            'Route tokens optional naming'
+        );
+        //Named routes
+        $f3->route('GET @blog_entry:/blog/@id/@slug','Blog->Entry');
+        $access->deny('@blog_entry');
+        $test->expect(
+            !$access->granted('/blog/1/hello') && $access->granted('/blog/1/hello/form') && $access->granted('/blog/1'),
+            'Named routes support'
+        );
         //Verb-level control
         $access=new \Access();
         $access->policy('allow');

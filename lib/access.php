@@ -77,7 +77,7 @@ class Access extends \Prefab {
         $rules=$specific+$global;//subject-specific rules have precedence over global rules
         krsort($rules);//specific paths are processed first
         foreach($rules as $path=>$rule)
-            if (preg_match('/^'.str_replace('\*','.*',preg_quote($path,'/')).'$/',$uri))
+            if (preg_match('/^'.preg_replace('/@\w*/','[^\/]+',str_replace('\*','.*',preg_quote($path,'/'))).'$/',$uri))
                 return $rule;
         return $this->policy==self::ALLOW;
     }
@@ -110,8 +110,11 @@ class Access extends \Prefab {
      */
     protected function parseRoute($str) {
         $verbs=$path='';
-        if (preg_match('/^\h*(\*|[\|\w]*)\h*(\H+)/',$str,$m))
+        if (preg_match('/^\h*(\*|[\|\w]*)\h*(\H+)/',$str,$m)) {
             list(,$verbs,$path)=$m;
+            if ($path[0]=='@')
+                $path=\Base::instance()->ALIASES[substr($path,1)];
+        }
         if (!$verbs || $verbs=='*')
             $verbs=\Base::VERBS;
         return array(explode('|',$verbs),$path);

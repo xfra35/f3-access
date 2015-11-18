@@ -14,7 +14,8 @@ This plugin for [Fat-Free Framework](http://github.com/bcosca/fatfree) helps you
     * [Path precedence](#path-precedence)
     * [Subject precedence](#subject-precedence)
     * [Routes uniqueness](#routes-uniqueness)
-* [Wildcards](#wildcards)
+* [Wildcards and tokens](#wildcards-and-tokens)
+* [Named routes](#named-routes)
 * [Ini configuration](#ini-configuration)
 * [Practical configuration examples](#practical-configuration-examples)
     * [Secure an admin area](#secure-an-admin-area)
@@ -188,7 +189,7 @@ In this example:
 * rule #1 is ignored
 * rule #3 is ignored for Dina only (not for Misha)
 
-## Wildcards
+## Wildcards and tokens
 
 Wildcards can be used at various places:
 
@@ -199,6 +200,18 @@ Wildcards can be used at various places:
 * instead of a subject, meaning "any subject": `$f3->allow('/','*')`
   * equivalent to `$f3->allow('/','')`
   * equivalent to `$f3->allow('/')`
+
+Routes tokens are also supported, so `$f3->allow('/blog/@id/@slug')` is recognized.
+
+Since the plugin doesn't make use of the token names, you can as well drop them: `$f3->allow('/blog/@/@')`
+
+In other words, `@` is a wildcard for any character which is not a forward slash,
+whereas `*` matches everything, including forward slashes.
+
+## Named routes
+
+If you're using [named routes](https://github.com/bcosca/fatfree#named-routes),
+you can directly refer to their aliases: `$f3->allow('@blog_entry')`;
 
 ## Ini configuration
 
@@ -332,5 +345,4 @@ See [here](#authorization-failure) for details about what happens when authoriza
 
 ## Potential improvements
 
-* Enable support for named routes
-* Think about `HEAD`
+* Think about `HEAD` and `CONNECT`: should they be authorized or consistently allowed?
