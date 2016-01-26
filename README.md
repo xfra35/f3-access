@@ -326,6 +326,14 @@ if ($access->granted('/admin/part1',$somebody)) {
 }
 ```
 
+NB: you can also check access against a set of subjects. This is useful for example if you've implemented
+a system of user roles or groups:
+
+```php
+$access->granted('/admin/part1',array('customer')); // FALSE
+$access->granted('/admin/part1',array('customer','admin')); // TRUE
+```
+
 ### authorize( $subject='', $ondeny=NULL )
 
 **Return TRUE if the given subject is granted access to the current route**
@@ -342,6 +350,14 @@ $access->authorize('admin',function($route,$subject){
 $access->authorize('admin','My\App->forbidden');
 ```
 See [here](#authorization-failure) for details about what happens when authorization fails.
+
+NB: you can also perform authorization against a set of subjects. This is useful for example if you've implemented
+a system of user roles or groups: just pass the array of roles/groups to authorize a user. E.g:
+
+```php
+$access->authorize(array('customer')); // unauthorized
+$access->authorize(array('customer','admin')); // authorized
+```
 
 ## Potential improvements
 

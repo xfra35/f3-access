@@ -106,6 +106,13 @@ class Tests {
             $access->granted('PUT /blog/entry','admin'),
             'Verb-level access control'
         );
+        //Multiple subjects
+        $test->expect(
+            $access->granted('GET /blog/entry',array('client','customer')) &&
+            !$access->granted('PUT /blog/entry',array('client','customer')) &&
+            $access->granted('PUT /blog/entry',array('client','admin')),
+            'Check access for a set of subjects'
+        );
         //Authorize method
         $f3->HALT=FALSE;
         $f3->VERB='GET';
@@ -134,6 +141,18 @@ class Tests {
         $test->expect(
             !$access->authorize('client') && $f3->get('ERROR.code')==403,
             'Unauthorize an identified subject (403 error)'
+        );
+        $f3->clear('ERROR');
+        $f3->ONERROR=function($f3){};//do nothing
+        $test->expect(
+            $access->authorize(array('client','admin')) && !$f3->get('ERROR.code'),
+            'Authorize a set of identified subjects'
+        );
+        $f3->clear('ERROR');
+        $f3->ONERROR=function($f3){};//do nothing
+        $test->expect(
+            !$access->authorize(array('client','customer')) && $f3->get('ERROR.code')==403,
+            'Unauthorize a set of identified subjects'
         );
         //Config variable
         $f3->HALT=TRUE;

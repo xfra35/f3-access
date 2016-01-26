@@ -64,13 +64,19 @@ class Access extends \Prefab {
     }
 
     /**
-     * Return TRUE if the given subject is granted access to the given route
-     * @param string $route
-     * @param string $subject
+     * Return TRUE if the given subject (or any of the given subjects) is granted access to the given route
+     * @param string|array $route
+     * @param string|array $subject
      * @return bool
      */
     function granted($route,$subject='') {
-        list($verbs,$uri)=$this->parseRoute($route);
+        list($verbs,$uri)=is_array($route)?$route:$this->parseRoute($route);
+        if (is_array($subject)) {
+            foreach($subject?:array('') as $s)
+                if ($this->granted([$verbs,$uri],$s))
+                    return TRUE;
+            return FALSE;
+        }
         $verb=$verbs[0];//we shouldn't get more than one verb here
         $specific=isset($this->rules[$subject][$verb])?$this->rules[$subject][$verb]:array();
         $global=isset($this->rules['*'][$verb])?$this->rules['*'][$verb]:array();
@@ -83,8 +89,8 @@ class Access extends \Prefab {
     }
 
     /**
-     * Authorize a given subject
-     * @param string $subject
+     * Authorize a given subject (or a set of subjects)
+     * @param string|array $subject
      * @param callable|string $ondeny
      * @return bool
      */
