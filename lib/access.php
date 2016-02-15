@@ -83,7 +83,7 @@ class Access extends \Prefab {
         $rules=$specific+$global;//subject-specific rules have precedence over global rules
         krsort($rules);//specific paths are processed first
         foreach($rules as $path=>$rule)
-            if (preg_match('/^'.preg_replace('/@\w*/','[^\/]+',str_replace('\*','.*',preg_quote($path,'/'))).'$/',$uri))
+            if (preg_match('/^'.preg_replace('/@\w*/','[^\/]+',str_replace('\*','.+',preg_quote($path,'/'))).'$/',$uri))
                 return $rule;
         return $this->policy==self::ALLOW;
     }

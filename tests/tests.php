@@ -62,8 +62,8 @@ class Tests {
         $access->deny('/admin*');
         $access->allow('/admin*','admin');
         $test->expect(
-            !$access->granted('/admin') && !$access->granted('/admin/foo/bar') &&
-            $access->granted('/admin','admin') && $access->granted('/admin/foo/bar','admin'),
+            !$access->granted('/admin/foo') && !$access->granted('/admin/foo/bar') &&
+            $access->granted('/admin/foo','admin') && $access->granted('/admin/foo/bar','admin'),
             'Wildcard suffix'
         );
         $access->deny('/*/edit');
