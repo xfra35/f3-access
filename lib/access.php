@@ -119,7 +119,7 @@ class Access extends \Prefab {
         if (preg_match('/^\h*(\*|[\|\w]*)\h*(\H+)/',$str,$m)) {
             list(,$verbs,$path)=$m;
             if ($path[0]=='@')
-                $path=\Base::instance()->ALIASES[substr($path,1)];
+                $path=\Base::instance()->get('ALIASES.'.substr($path,1));
         }
         if (!$verbs || $verbs=='*')
             $verbs=\Base::VERBS;
