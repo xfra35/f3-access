@@ -201,8 +201,7 @@ Wildcards can be used at various places:
   * equivalent to `$f3->allow('/','')`
   * equivalent to `$f3->allow('/')`
 
-**IMPORTANT**: following the framework convention and unlike usual filesystem wildcards,
-the plugin wildcards do not match empty strings. So `/admin*` doesn't match `/admin` (at least 1 character is required).
+**NB**: wildcards match empty strings, so `/admin*` match `/admin`.
 
 Routes tokens are also supported, so `$f3->allow('/blog/@id/@slug')` is recognized.
 

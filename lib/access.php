@@ -81,9 +81,19 @@ class Access extends \Prefab {
         $specific=isset($this->rules[$subject][$verb])?$this->rules[$subject][$verb]:array();
         $global=isset($this->rules['*'][$verb])?$this->rules['*'][$verb]:array();
         $rules=$specific+$global;//subject-specific rules have precedence over global rules
-        krsort($rules);//specific paths are processed first
+        //specific paths are processed first:
+        $paths=array();
+        foreach ($keys=array_keys($rules) as $key) {
+            $path=str_replace('@','*@',$key);
+            if (substr($path,-1)!='*')
+                $path.='+';
+            $paths[]=$path;
+        }
+        $vals=array_values($rules);
+        array_multisort($paths,SORT_DESC,$keys,$vals);
+        $rules=array_combine($keys,$vals);
         foreach($rules as $path=>$rule)
-            if (preg_match('/^'.preg_replace('/@\w*/','[^\/]+',str_replace('\*','.+',preg_quote($path,'/'))).'$/',$uri))
+            if (preg_match('/^'.preg_replace('/@\w*/','[^\/]+',str_replace('\*','.*',preg_quote($path,'/'))).'$/',$uri))
                 return $rule;
         return $this->policy==self::ALLOW;
     }
