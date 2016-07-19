@@ -136,10 +136,15 @@ class Access extends \Prefab {
         return array(explode('|',$verbs),$path);
     }
 
-    //! Constructor
-    function __construct() {
-        $f3=\Base::instance();
-        $config=(array)$f3->get('ACCESS');
+    /**
+     * Constructor
+     * @param array $config
+     */
+    function __construct($config=NULL) {
+        if (!isset($config)) {
+            $f3=\Base::instance();
+            $config=(array)$f3->get('ACCESS');
+        }
         if (isset($config['policy']))
             $this->policy($config['policy']);
         if (isset($config['rules']))
