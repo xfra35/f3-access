@@ -266,7 +266,7 @@ allow /*/create = superuser
 [ACCESS.rules]
 deny * /* = *
 deny GET /* = *
-allow POST|PUT|PATCH|DELETE = superuser
+allow POST|PUT|PATCH|DELETE /* = superuser
 ```
 
 ### Secure a members-only site
