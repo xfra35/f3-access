@@ -112,9 +112,11 @@ $access->allow('POST|PATCH|PUT|DELETE /path','admin');
 ```
 In this example, only "admin" can modify `/path`. Any other subject can only `GET` it.
 
-**IMPORTANT:** providing no HTTP method is equivalent to providing *all* HTTP methods. E.g:
+**IMPORTANT:** providing no HTTP method is equivalent to providing *all* HTTP methods (unless you're using named routes, [see below](#named-routes)).
+
+E.g:
 ```php
-// the following are equivalent:
+// the following rules are equivalent:
 $access->deny('/path');
 $access->deny('GET|HEAD|POST|PUT|PATCH|DELETE|CONNECT /path');
 ```
@@ -214,6 +216,18 @@ whereas `*` matches everything, including forward slashes.
 
 If you're using [named routes](https://github.com/bcosca/fatfree#named-routes),
 you can directly refer to their aliases: `$f3->allow('@blog_entry')`;
+
+In that case, providing no HTTP method is equivalent to providing the methods which are actually mapped to the given route. See:
+
+```php
+$f3->route('GET|POST @admin_user_edit: /admin/user/@id','Class->edit');
+$f3->route('DELETE @admin_user_delete: /admin/user/@id','Class->delete');
+
+// the following rules are equivalent:
+$access->deny('@admin_user_edit');
+$access->deny('GET|POST @admin_user_edit');
+$access->deny('GET|POST /admin/user/@id');
+```
 
 ## Ini configuration
 
