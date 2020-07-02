@@ -177,6 +177,19 @@ class Tests {
         $access->allow('@admin_user_edit','user_admin_edit');
         $access->allow('@admin_user_delete','user_admin_delete');
         $test->expect(
+            $access->granted('GET /admin/user/new','superadmin') &&
+            $access->granted('GET /admin/user/23','superadmin') &&
+            $access->granted('POST /admin/user/23','superadmin') &&
+            $access->granted('POST /admin/user/new','user_admin_create') &&
+            $access->granted('POST /admin/user/23','user_admin_edit') &&
+            !$access->granted('POST /admin/user/23','client') &&
+            !$access->granted('GET /admin/user/new','user_admin_edit') &&
+            !$access->granted('POST /admin/user/new','user_admin_edit') &&
+            !$access->granted('GET /admin/user/23','user_admin_create') &&
+            !$access->granted('POST /admin/user/23','user_admin_create'),
+            'Static routes precedence'
+        );
+        $test->expect(
             $access->granted('GET /admin/user/23','superadmin') &&
             $access->granted('DELETE /admin/user/23','superadmin') &&
             $access->granted('POST /admin/user/23','user_admin_edit') &&
@@ -188,6 +201,25 @@ class Tests {
             !$access->granted('DELETE /admin/user/12','user_admin_create') &&
             !$access->granted('DELETE /admin/user/12','user_admin_edit'),
             'Named route verb inheritance'
+        );
+        $access->policy('deny');
+        $test->expect(
+            $access->granted('GET /admin/user/new','superadmin') &&
+            $access->granted('GET /admin/user/23','superadmin') &&
+            $access->granted('POST /admin/user/23','superadmin') &&
+            $access->granted('DELETE /admin/user/23','superadmin') &&
+            $access->granted('POST /admin/user/new','user_admin_create') &&
+            $access->granted('POST /admin/user/23','user_admin_edit') &&
+            $access->granted('DELETE /admin/user/23','user_admin_delete') &&
+            !$access->granted('POST /admin/user/23','client') &&
+            !$access->granted('DELETE /admin/user/23','client') &&
+            !$access->granted('GET /admin/user/new','user_admin_edit') &&
+            !$access->granted('POST /admin/user/new','user_admin_edit') &&
+            !$access->granted('GET /admin/user/23','user_admin_create') &&
+            !$access->granted('POST /admin/user/23','user_admin_create') &&
+            !$access->granted('DELETE /admin/user/12','user_admin_create') &&
+            !$access->granted('DELETE /admin/user/12','user_admin_edit'),
+            'Routes precedence & VERB test, reversed default policy'
         );
         $access=new \Access();
         $test->expect(
