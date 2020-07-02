@@ -130,13 +130,13 @@ class Access extends \Prefab {
             list(,$verbs,$path)=$m;
             if ($path[0]=='@') {
                 $alias=substr($path,1);
-                $f3 = \Base::instance();
+                $f3=\Base::instance();
                 $path=$f3->get('ALIASES.'.$alias);
                 if (!$verbs) {
                     $verbs=[];
                     foreach($f3['ROUTES'][$path]?:[] as $type=>$route) {
-                        foreach ($route as $verb => $conf)
-                            if ($conf[3] == $alias)
+                        foreach ($route as $verb=>$conf)
+                            if ($conf[3]==$alias)
                                 $verbs[]=$verb;
                     }
                     $verbs=array_unique($verbs);
