@@ -128,12 +128,26 @@ class Access extends \Prefab {
         $verbs=$path='';
         if (preg_match('/^\h*(\*|[\|\w]*)\h*(\H+)/',$str,$m)) {
             list(,$verbs,$path)=$m;
-            if ($path[0]=='@')
-                $path=\Base::instance()->get('ALIASES.'.substr($path,1));
+            if ($path[0]=='@') {
+                $alias=substr($path,1);
+                $f3 = \Base::instance();
+                $path=$f3->get('ALIASES.'.$alias);
+                if (!$verbs) {
+                    $verbs=[];
+                    foreach($f3['ROUTES'][$path]?:[] as $type=>$route) {
+                        foreach ($route as $verb => $conf)
+                            if ($conf[3] == $alias)
+                                $verbs[]=$verb;
+                    }
+                    $verbs=array_unique($verbs);
+                }
+            }
         }
         if (!$verbs || $verbs=='*')
             $verbs=\Base::VERBS;
-        return array(explode('|',$verbs),$path);
+        if (!is_array($verbs))
+            $verbs=explode('|',$verbs);
+        return array($verbs,$path);
     }
 
     /**
