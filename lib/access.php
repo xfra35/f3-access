@@ -82,6 +82,7 @@ class Access extends \Prefab {
         foreach ($this->rules as $sub => $verbs)
             if ($sub!=$subject && isset($verbs[$verb]))
                 foreach ($verbs[$verb] as $path => $rule) {
+                    $path=strtolower($path);
                     if (!isset($others[$path]))
                         $others[$path]=[$sub=>$rule];
                     else
@@ -93,7 +94,7 @@ class Access extends \Prefab {
         //specific paths are processed first:
         $paths=array();
         foreach ($keys=array_keys($rules) as $key) {
-            $path=str_replace('@','*@',$key);
+            $path=str_replace('@','*@',strtolower($key));
             if (substr($path,-1)!='*')
                 $path.='+';
             $paths[]=$path;
@@ -103,8 +104,8 @@ class Access extends \Prefab {
         $rules=array_combine($keys,$vals);
         foreach($rules as $path=>$rule)
             if (preg_match('/^'.preg_replace('/@\w*/','[^\/]+',
-                str_replace('\*','.*',preg_quote($path,'/'))).'$/',$uri))
-                return (strpos($path,'@')!==FALSE && isset($others[$uri]))
+                str_replace('\*','.*',preg_quote($path,'/'))).'$/i',$uri))
+                return (strpos($path,'@')!==FALSE && isset($others[strtolower($uri)]))
                     ? !$this->policy==self::DENY: $rule;
         return $this->policy==self::ALLOW;
     }
