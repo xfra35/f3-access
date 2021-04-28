@@ -26,7 +26,7 @@ class Access extends \Prefab {
         list($verbs,$path)=$this->parseRoute($route);
         foreach($subjects as $subject)
             foreach($verbs as $verb)
-                $this->rules[$subject?:'*'][$verb][$path]=$accept;
+                $this->rules[$subject?:'*'][$verb][strtolower($path)]=$accept;
         return $this;
     }
 
@@ -82,7 +82,6 @@ class Access extends \Prefab {
         foreach ($this->rules as $sub => $verbs)
             if ($sub!=$subject && isset($verbs[$verb]))
                 foreach ($verbs[$verb] as $path => $rule) {
-                    $path=strtolower($path);
                     if (!isset($others[$path]))
                         $others[$path]=[$sub=>$rule];
                     else
