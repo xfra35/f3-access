@@ -191,6 +191,18 @@ In this example:
 * rule #1 is ignored
 * rule #3 is ignored for Dina only (not for Misha)
 
+### Path case insensitivity
+
+For security purposes, paths are considered case insensitive, no matter the value of the framework `CASELESS` variable.
+
+Therefore, the following rules are equivalent:
+
+```php
+$access->deny('/restricted/area');
+$access->deny('/RESTRICTED/AREA');
+$access->deny('/rEsTrIcTeD/aReA');
+```
+
 ## Wildcards and tokens
 
 Wildcards can be used at various places:
