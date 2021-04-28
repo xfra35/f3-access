@@ -14,6 +14,7 @@ This plugin for [Fat-Free Framework](http://github.com/bcosca/fatfree) helps you
     * [Path precedence](#path-precedence)
     * [Subject precedence](#subject-precedence)
     * [Routes uniqueness](#routes-uniqueness)
+    * [Path case insensitivity](#path-case-insensitivity)
 * [Wildcards and tokens](#wildcards-and-tokens)
 * [Named routes](#named-routes)
 * [Ini configuration](#ini-configuration)
