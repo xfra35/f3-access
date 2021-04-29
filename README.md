@@ -23,6 +23,7 @@ This plugin for [Fat-Free Framework](http://github.com/bcosca/fatfree) helps you
     * [Secure MVC-like routes](#secure-mvc-like-routes)
     * [Secure RMR-like routes](#secure-rmr-like-routes)
     * [Secure a members-only site](#secure-a-members-only-site)
+* [Pitfall](#pitfall)
 * [API](#api)
 * [Potential improvements](#potential-improvements)
 
@@ -225,6 +226,8 @@ Since the plugin doesn't make use of the token names, you can as well drop them:
 In other words, `@` is a wildcard for any character which is not a forward slash,
 whereas `*` matches everything, including forward slashes.
 
+**IMPORTANT**: read the [Pitfall](#pitfall) section.
+
 ## Named routes
 
 If you're using [named routes](https://github.com/bcosca/fatfree#named-routes),
@@ -305,6 +308,47 @@ ACCESS.policy = deny
 allow / = * ; login form
 allow /* = member
 ```
+
+## Pitfall
+
+### Static routes overriding dynamic routes
+
+Be careful when having static routes overriding dynamic routes.
+
+Although not advised, the following setup is made possible by the framework:
+
+```php
+$f3->route('GET /admin/user/@id','User->edit');
+$f3->route('GET /admin/user/new','User->create');
+```
+
+From an authorization point of view, we may be tempted to write:
+
+```php
+$access->deny('/admin*','*');// deny access to all admin paths by default
+$access->allow('/admin/user/@id','edit_role');// allow edit_role to access /admin/user/@id
+$access->allow('/admin/user/new','create_role');// allow create_role to access /admin/user/new
+```
+
+Doing so, we might think that the `edit_role` can't access the `/admin/user/new` path, but this is an illusion.
+
+Indeed, the `@id` token match any string, including `new`.
+
+To be convinced of this, just think that there's no difference between `/admin/user/@id` and `/admin/user/@anything`.
+
+So in order to achieve a complete separation of roles, the correct configuration would be, in this situation:
+
+```php
+$access->deny('/admin*','*');// deny access to all admin paths by default
+$access->allow('/admin/user/@id','edit_role');// allow edit_role to access /admin/user/@id.
+$access->deny('/admin/user/new','edit_role');// ... but not /admin/user/new
+$access->allow('/admin/user/new','create_role');// allow create_role to access /admin/user/new
+```
+
+A clearer setup would be:
+
+* either to define one single path `/admin/user/@id` with `id=new` being handled inside a single controller
+* or to define two unambiguous paths, for example `/admin/user/@id` and `/admin/new-user`
 
 ## API
 
