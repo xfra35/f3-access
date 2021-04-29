@@ -78,15 +78,6 @@ class Access extends \Prefab {
             return FALSE;
         }
         $verb=$verbs[0];//we shouldn't get more than one verb here
-        $others=[];
-        foreach ($this->rules as $sub => $verbs)
-            if ($sub!=$subject && isset($verbs[$verb]))
-                foreach ($verbs[$verb] as $path => $rule) {
-                    if (!isset($others[$path]))
-                        $others[$path]=[$sub=>$rule];
-                    else
-                        $others[$path][$sub]=$rule;
-                }
         $specific=isset($this->rules[$subject][$verb])?$this->rules[$subject][$verb]:[];
         $global=isset($this->rules['*'][$verb])?$this->rules['*'][$verb]:[];
         $rules=$specific+$global;//subject-specific rules have precedence over global rules
@@ -104,8 +95,7 @@ class Access extends \Prefab {
         foreach($rules as $path=>$rule)
             if (preg_match('/^'.preg_replace('/@\w*/','[^\/]+',
                 str_replace('\*','.*',preg_quote($path,'/'))).'$/i',$uri))
-                return (strpos($path,'@')!==FALSE && isset($others[strtolower($uri)]))
-                    ? !$this->policy==self::DENY: $rule;
+                return $rule;
         return $this->policy==self::ALLOW;
     }
 
