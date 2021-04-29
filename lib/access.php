@@ -11,7 +11,7 @@ class Access extends \Prefab {
     protected $policy=self::ALLOW;
 
     /** @var array */
-    protected $rules=array();
+    protected $rules=[];
 
     /**
      * Define an access rule to a route
@@ -58,7 +58,7 @@ class Access extends \Prefab {
     function policy($default=NULL) {
         if (!isset($default))
             return $this->policy;
-        if (in_array($default=strtolower($default),array(self::ALLOW,self::DENY)))
+        if (in_array($default=strtolower($default),[self::ALLOW,self::DENY]))
             $this->policy=$default;
         return $this;
     }
@@ -72,7 +72,7 @@ class Access extends \Prefab {
     function granted($route,$subject='') {
         list($verbs,$uri)=is_array($route)?$route:$this->parseRoute($route);
         if (is_array($subject)) {
-            foreach($subject?:array('') as $s)
+            foreach($subject?:[''] as $s)
                 if ($this->granted([$verbs,$uri],$s))
                     return TRUE;
             return FALSE;
@@ -87,11 +87,11 @@ class Access extends \Prefab {
                     else
                         $others[$path][$sub]=$rule;
                 }
-        $specific=isset($this->rules[$subject][$verb])?$this->rules[$subject][$verb]:array();
-        $global=isset($this->rules['*'][$verb])?$this->rules['*'][$verb]:array();
+        $specific=isset($this->rules[$subject][$verb])?$this->rules[$subject][$verb]:[];
+        $global=isset($this->rules['*'][$verb])?$this->rules['*'][$verb]:[];
         $rules=$specific+$global;//subject-specific rules have precedence over global rules
         //specific paths are processed first:
-        $paths=array();
+        $paths=[];
         foreach ($keys=array_keys($rules) as $key) {
             $path=str_replace('@','*@',strtolower($key));
             if (substr($path,-1)!='*')
@@ -118,7 +118,7 @@ class Access extends \Prefab {
     function authorize($subject='',$ondeny=NULL) {
         $f3=\Base::instance();
         if (!$this->granted($route=$f3->VERB.' '.$f3->PATH,$subject) &&
-            (!isset($ondeny) || FALSE===$f3->call($ondeny,array($route,$subject)))) {
+            (!isset($ondeny) || FALSE===$f3->call($ondeny,[$route,$subject]))) {
             $f3->error($subject?403:401);
             return FALSE;
         }
@@ -158,7 +158,7 @@ class Access extends \Prefab {
             $verbs=\Base::VERBS;
         if (!is_array($verbs))
             $verbs=explode('|',$verbs);
-        return array($verbs,$path);
+        return [$verbs,$path];
     }
 
     /**
@@ -174,7 +174,7 @@ class Access extends \Prefab {
             $this->policy($config['policy']);
         if (isset($config['rules']))
             foreach((array)$config['rules'] as $str=>$subjects) {
-                foreach(array(self::DENY,self::ALLOW) as $k=>$policy)
+                foreach([self::DENY,self::ALLOW] as $k=>$policy)
                     if (stripos($str,$policy)===0)
                         $this->rule((bool)$k,substr($str,strlen($policy)),$subjects);
             }

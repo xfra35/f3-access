@@ -111,9 +111,9 @@ class Tests {
         );
         //Multiple subjects
         $test->expect(
-            $access->granted('GET /blog/entry',array('client','customer')) &&
-            !$access->granted('PUT /blog/entry',array('client','customer')) &&
-            $access->granted('PUT /blog/entry',array('client','admin')),
+            $access->granted('GET /blog/entry',['client','customer']) &&
+            !$access->granted('PUT /blog/entry',['client','customer']) &&
+            $access->granted('PUT /blog/entry',['client','admin']),
             'Check access for a set of subjects'
         );
         //Authorize method
@@ -148,13 +148,13 @@ class Tests {
         $f3->clear('ERROR');
         $f3->ONERROR=function($f3){};//do nothing
         $test->expect(
-            $access->authorize(array('client','admin')) && !$f3->get('ERROR.code'),
+            $access->authorize(['client','admin']) && !$f3->get('ERROR.code'),
             'Authorize a set of identified subjects'
         );
         $f3->clear('ERROR');
         $f3->ONERROR=function($f3){};//do nothing
         $test->expect(
-            !$access->authorize(array('client','customer')) && $f3->get('ERROR.code')==403,
+            !$access->authorize(['client','customer']) && $f3->get('ERROR.code')==403,
             'Unauthorize a set of identified subjects'
         );
         //Config variable
