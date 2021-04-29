@@ -167,8 +167,9 @@ class Tests {
             'ALLOW DELETE /foo' => 'admin',
         ));
         $runs=[
-            1=>['/admin/user/new','/admin/user/@id','/admin*'],
-            2=>['/AdMin/uSeR/new','/AdMin/uSeR/@id','/aDmiN*'],
+            1=>['/admin/user/new','/admin/user/@id','/admin*'],// lower case paths
+            2=>['/AdMin/uSeR/new','/AdMin/uSeR/@id','/aDmiN*'],// mixed case paths
+            3=>['/@lang/AdMin/uSeR/new','/@lang/AdMin/uSeR/@id','/@lang/aDmiN*'],// multi-token paths
         ];
         foreach ($runs as $run=>$strings) {
             $access=new \Access();
@@ -180,68 +181,70 @@ class Tests {
             $access->allow('* '.$strings[2],'superadmin');
             $access->allow('@admin_user_new','user_admin_create');
             $access->allow('@admin_user_edit','user_admin_edit');
+            $access->deny('@admin_user_new','user_admin_edit');
             $access->allow('@admin_user_delete','user_admin_delete');
+            $lang=strpos($strings[0],'@lang')>0?'/@lang':'';// lang token (enabled on run 3)
             $test->expect(
-                $access->granted('GET /admin/user/new','superadmin') &&
-                $access->granted('GET /admin/user/23','superadmin') &&
-                $access->granted('POST /admin/user/23','superadmin') &&
-                $access->granted('POST /admin/user/new','user_admin_create') &&
-                $access->granted('POST /admin/user/23','user_admin_edit') &&
-                !$access->granted('POST /admin/user/23','client') &&
-                !$access->granted('GET /admin/user/new','user_admin_edit') &&
-                !$access->granted('POST /admin/user/new','user_admin_edit') &&
-                !$access->granted('GET /admin/user/23','user_admin_create') &&
-                !$access->granted('POST /admin/user/23','user_admin_create'),
+                $access->granted('GET '.$lang.'/admin/user/new','superadmin') &&
+                $access->granted('GET '.$lang.'/admin/user/23','superadmin') &&
+                $access->granted('POST '.$lang.'/admin/user/23','superadmin') &&
+                $access->granted('POST '.$lang.'/admin/user/new','user_admin_create') &&
+                $access->granted('POST '.$lang.'/admin/user/23','user_admin_edit') &&
+                !$access->granted('POST '.$lang.'/admin/user/23','client') &&
+                !$access->granted('GET '.$lang.'/admin/user/new','user_admin_edit') &&
+                !$access->granted('POST '.$lang.'/admin/user/new','user_admin_edit') &&
+                !$access->granted('GET '.$lang.'/admin/user/23','user_admin_create') &&
+                !$access->granted('POST '.$lang.'/admin/user/23','user_admin_create'),
                 'Static routes precedence (run '.$run.')'
             );
             $test->expect(
-                $access->granted('GET /admin/user/23','superadmin') &&
-                $access->granted('DELETE /admin/user/23','superadmin') &&
-                $access->granted('POST /admin/user/23','user_admin_edit') &&
-                $access->granted('DELETE /admin/user/23','user_admin_delete') &&
-                !$access->granted('POST /admin/user/23','client') &&
-                !$access->granted('DELETE /admin/user/23','client') &&
-                !$access->granted('GET /admin/user/23','user_admin_create') &&
-                !$access->granted('POST /admin/user/23','user_admin_create') &&
-                !$access->granted('DELETE /admin/user/12','user_admin_create') &&
-                !$access->granted('DELETE /admin/user/12','user_admin_edit'),
+                $access->granted('GET '.$lang.'/admin/user/23','superadmin') &&
+                $access->granted('DELETE '.$lang.'/admin/user/23','superadmin') &&
+                $access->granted('POST '.$lang.'/admin/user/23','user_admin_edit') &&
+                $access->granted('DELETE '.$lang.'/admin/user/23','user_admin_delete') &&
+                !$access->granted('POST '.$lang.'/admin/user/23','client') &&
+                !$access->granted('DELETE '.$lang.'/admin/user/23','client') &&
+                !$access->granted('GET '.$lang.'/admin/user/23','user_admin_create') &&
+                !$access->granted('POST '.$lang.'/admin/user/23','user_admin_create') &&
+                !$access->granted('DELETE '.$lang.'/admin/user/12','user_admin_create') &&
+                !$access->granted('DELETE '.$lang.'/admin/user/12','user_admin_edit'),
                 'Named route verb inheritance (run '.$run.')'
             );
             $access->policy('deny');
             $test->expect(
-                $access->granted('GET /admin/user/new','superadmin') &&
-                $access->granted('GET /admin/user/23','superadmin') &&
-                $access->granted('POST /admin/user/23','superadmin') &&
-                $access->granted('DELETE /admin/user/23','superadmin') &&
-                $access->granted('POST /admin/user/new','user_admin_create') &&
-                $access->granted('POST /admin/user/23','user_admin_edit') &&
-                $access->granted('DELETE /admin/user/23','user_admin_delete') &&
-                !$access->granted('POST /admin/user/23','client') &&
-                !$access->granted('DELETE /admin/user/23','client') &&
-                !$access->granted('GET /admin/user/new','user_admin_edit') &&
-                !$access->granted('POST /admin/user/new','user_admin_edit') &&
-                !$access->granted('GET /admin/user/23','user_admin_create') &&
-                !$access->granted('POST /admin/user/23','user_admin_create') &&
-                !$access->granted('DELETE /admin/user/12','user_admin_create') &&
-                !$access->granted('DELETE /admin/user/12','user_admin_edit'),
+                $access->granted('GET '.$lang.'/admin/user/new','superadmin') &&
+                $access->granted('GET '.$lang.'/admin/user/23','superadmin') &&
+                $access->granted('POST '.$lang.'/admin/user/23','superadmin') &&
+                $access->granted('DELETE '.$lang.'/admin/user/23','superadmin') &&
+                $access->granted('POST '.$lang.'/admin/user/new','user_admin_create') &&
+                $access->granted('POST '.$lang.'/admin/user/23','user_admin_edit') &&
+                $access->granted('DELETE '.$lang.'/admin/user/23','user_admin_delete') &&
+                !$access->granted('POST '.$lang.'/admin/user/23','client') &&
+                !$access->granted('DELETE '.$lang.'/admin/user/23','client') &&
+                !$access->granted('GET '.$lang.'/admin/user/new','user_admin_edit') &&
+                !$access->granted('POST '.$lang.'/admin/user/new','user_admin_edit') &&
+                !$access->granted('GET '.$lang.'/admin/user/23','user_admin_create') &&
+                !$access->granted('POST '.$lang.'/admin/user/23','user_admin_create') &&
+                !$access->granted('DELETE '.$lang.'/admin/user/12','user_admin_create') &&
+                !$access->granted('DELETE '.$lang.'/admin/user/12','user_admin_edit'),
                 'Routes precedence & VERB test, reversed default policy (run '.$run.')'
             );
             $test->expect(
-                $access->granted('GET /Admin/User/New','superadmin') &&
-                $access->granted('GET /Admin/User/23','superadmin') &&
-                $access->granted('POST /Admin/User/23','superadmin') &&
-                $access->granted('DELETE /Admin/User/23','superadmin') &&
-                $access->granted('POST /Admin/User/New','user_admin_create') &&
-                $access->granted('POST /Admin/User/23','user_admin_edit') &&
-                $access->granted('DELETE /Admin/User/23','user_admin_delete') &&
-                !$access->granted('POST /Admin/User/23','client') &&
-                !$access->granted('DELETE /Admin/User/23','client') &&
-                !$access->granted('GET /Admin/User/New','user_admin_edit') &&
-                !$access->granted('POST /Admin/User/New','user_admin_edit') &&
-                !$access->granted('GET /Admin/User/23','user_admin_create') &&
-                !$access->granted('POST /Admin/User/23','user_admin_create') &&
-                !$access->granted('DELETE /Admin/User/12','user_admin_create') &&
-                !$access->granted('DELETE /Admin/User/12','user_admin_edit'),
+                $access->granted('GET '.$lang.'/Admin/User/New','superadmin') &&
+                $access->granted('GET '.$lang.'/Admin/User/23','superadmin') &&
+                $access->granted('POST '.$lang.'/Admin/User/23','superadmin') &&
+                $access->granted('DELETE '.$lang.'/Admin/User/23','superadmin') &&
+                $access->granted('POST '.$lang.'/Admin/User/New','user_admin_create') &&
+                $access->granted('POST '.$lang.'/Admin/User/23','user_admin_edit') &&
+                $access->granted('DELETE '.$lang.'/Admin/User/23','user_admin_delete') &&
+                !$access->granted('POST '.$lang.'/Admin/User/23','client') &&
+                !$access->granted('DELETE '.$lang.'/Admin/User/23','client') &&
+                !$access->granted('GET '.$lang.'/Admin/User/New','user_admin_edit') &&
+                !$access->granted('POST '.$lang.'/Admin/User/New','user_admin_edit') &&
+                !$access->granted('GET '.$lang.'/Admin/User/23','user_admin_create') &&
+                !$access->granted('POST '.$lang.'/Admin/User/23','user_admin_create') &&
+                !$access->granted('DELETE '.$lang.'/Admin/User/12','user_admin_create') &&
+                !$access->granted('DELETE '.$lang.'/Admin/User/12','user_admin_edit'),
                 'Case insensitivity test (run '.$run.')'
             );
             unset($f3->ROUTES[$strings[0]],$f3->ROUTES[$strings[1]]);
