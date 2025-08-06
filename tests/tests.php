@@ -161,11 +161,11 @@ class Tests {
         $f3->HALT=TRUE;
         $f3->ONERROR=NULL;
         $f3->set('ACCESS.policy','deny');
-        $f3->set('ACCESS.rules',array(
+        $f3->set('ACCESS.rules',[
             'ALLOW * /foo' => '*',
             'DENY DELETE /foo' => '*',
             'ALLOW DELETE /foo' => 'admin',
-        ));
+        ]);
         $runs=[
             1=>['/admin/user/new','/admin/user/@id','/admin*'],// lower case paths
             2=>['/AdMin/uSeR/new','/AdMin/uSeR/@id','/aDmiN*'],// mixed case paths
